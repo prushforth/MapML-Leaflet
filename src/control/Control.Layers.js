@@ -186,7 +186,7 @@ L.Control.Layers = L.Control.extend({
 		this._separator = L.DomUtil.create('div', className + '-separator', form);
 		this._overlaysList = L.DomUtil.create('div', className + '-overlays', form);
 
-		container.appendChild(form);
+		Polymer.dom(container).appendChild(form);
 	},
 
 	_getLayer: function (id) {
@@ -273,7 +273,7 @@ L.Control.Layers = L.Control.extend({
 		var radioFragment = document.createElement('div');
 		radioFragment.innerHTML = radioHtml;
 
-		return radioFragment.firstChild;
+		return Polymer.dom(radioFragment).firstChild;
 	},
 
 	_addItem: function (obj) {
@@ -301,12 +301,12 @@ L.Control.Layers = L.Control.extend({
 		// https://github.com/Leaflet/Leaflet/issues/2771
 		var holder = document.createElement('div');
 
-		label.appendChild(holder);
-		holder.appendChild(input);
-		holder.appendChild(name);
+		Polymer.dom(label).appendChild(holder);
+		Polymer.dom(holder).appendChild(input);
+		Polymer.dom(holder).appendChild(name);
 
 		var container = obj.overlay ? this._overlaysList : this._baseLayersList;
-		container.appendChild(label);
+		Polymer.dom(container).appendChild(label);
 
 		this._checkDisabledLayers();
 		return label;
