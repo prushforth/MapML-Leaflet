@@ -1,3 +1,5 @@
+/* global Polymer */
+/* eslint no-undef: "error" */
 /*
  * @class Control.Attribution
  * @aka L.Control.Attribution
@@ -98,7 +100,7 @@ L.Control.Attribution = L.Control.extend({
 			prefixAndAttribs.push(attribs.join(', '));
 		}
 
-		this._container.innerHTML = prefixAndAttribs.join(' | ');
+		Polymer.dom(this._container).innerHTML = prefixAndAttribs.join(' | ');
 	}
 });
 

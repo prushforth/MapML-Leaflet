@@ -1,5 +1,5 @@
 /*
- Leaflet 1.0.0-rc.1 (a626826), a JS library for interactive maps. http://leafletjs.com
+ Leaflet 1.0.0-rc.1 ("9721c93"), a JS library for interactive maps. http://leafletjs.com
  (c) 2010-2015 Vladimir Agafonkin, (c) 2010-2011 CloudMade
 */
 (function (window, document, undefined) {
@@ -1273,9 +1273,10 @@ L.DomUtil = {
 	// including computed values or values set through CSS.
 	getStyle: function (el, style) {
 
-		var value = el.style[style] || (el.currentStyle && el.currentStyle[style]);
+		var value = Polymer.dom(el).node.style[style] || (Polymer.dom(el).node.currentStyle && Polymer.dom(el).node.currentStyle[style]);
 
 		if ((!value || value === 'auto') && document.defaultView) {
+			Polymer.dom.flush();
 			var css = document.defaultView.getComputedStyle(el, null);
 			value = css ? css[style] : null;
 		}
@@ -1288,10 +1289,10 @@ L.DomUtil = {
 	create: function (tagName, className, container) {
 
 		var el = document.createElement(tagName);
-		el.className = className;
+		el.className = className || '';
 
 		if (container) {
-			container.appendChild(el);
+			Polymer.dom(container).appendChild(el);
 		}
 
 		return el;
@@ -1300,38 +1301,38 @@ L.DomUtil = {
 	// @function remove(el: HTMLElement)
 	// Removes `el` from its parent element
 	remove: function (el) {
-		var parent = el.parentNode;
+		var parent = Polymer.dom(el).parentNode;
 		if (parent) {
-			parent.removeChild(el);
+			Polymer.dom(parent).removeChild(el);
 		}
 	},
 
 	// @function empty(el: HTMLElement)
 	// Removes all of `el`'s children elements from `el`
 	empty: function (el) {
-		while (el.firstChild) {
-			el.removeChild(el.firstChild);
+		while (Polymer.dom(el).firstChild) {
+			Polymer.dom(el).removeChild(Polymer.dom(el).firstChild);
 		}
 	},
 
 	// @function toFront(el: HTMLElement)
 	// Makes `el` the last children of its parent, so it renders in front of the other children.
 	toFront: function (el) {
-		el.parentNode.appendChild(el);
+		Polymer.dom(Polymer.dom(el).parentNode).appendChild(el);
 	},
 
 	// @function toBack(el: HTMLElement)
 	// Makes `el` the first children of its parent, so it renders back from the other children.
 	toBack: function (el) {
-		var parent = el.parentNode;
-		parent.insertBefore(el, parent.firstChild);
+		var parent = Polymer.dom(el).parentNode;
+		Polymer.dom(parent).insertBefore(el, Polymer.dom(parent).firstChild);
 	},
 
 	// @function hasClass(el: HTMLElement, name: String): Boolean
 	// Returns `true` if the element's class attribute contains `name`.
 	hasClass: function (el, name) {
-		if (el.classList !== undefined) {
-			return el.classList.contains(name);
+		if (Polymer.dom(el).classList !== undefined) {
+			return Polymer.dom(el).classList.contains(name);
 		}
 		var className = L.DomUtil.getClass(el);
 		return className.length > 0 && new RegExp('(^|\\s)' + name + '(\\s|$)').test(className);
@@ -1340,10 +1341,10 @@ L.DomUtil = {
 	// @function addClass(el: HTMLElement, name: String)
 	// Adds `name` to the element's class attribute.
 	addClass: function (el, name) {
-		if (el.classList !== undefined) {
+		if (Polymer.dom(el).classList !== undefined) {
 			var classes = L.Util.splitWords(name);
 			for (var i = 0, len = classes.length; i < len; i++) {
-				el.classList.add(classes[i]);
+				Polymer.dom(el).classList.add(classes[i]);
 			}
 		} else if (!L.DomUtil.hasClass(el, name)) {
 			var className = L.DomUtil.getClass(el);
@@ -1354,8 +1355,8 @@ L.DomUtil = {
 	// @function removeClass(el: HTMLElement, name: String)
 	// Removes `name` from the element's class attribute.
 	removeClass: function (el, name) {
-		if (el.classList !== undefined) {
-			el.classList.remove(name);
+		if (Polymer.dom(el).classList !== undefined) {
+			Polymer.dom(el).classList.remove(name);
 		} else {
 			L.DomUtil.setClass(el, L.Util.trim((' ' + L.DomUtil.getClass(el) + ' ').replace(' ' + name + ' ', ' ')));
 		}
@@ -1364,18 +1365,18 @@ L.DomUtil = {
 	// @function setClass(el: HTMLElement, name: String)
 	// Sets the element's class.
 	setClass: function (el, name) {
-		if (el.className.baseVal === undefined) {
-			el.className = name;
+		if (Polymer.dom(el).classList.node.className.baseVal === undefined) {
+			Polymer.dom(el).classList.node.className = name;
 		} else {
 			// in case of SVG element
-			el.className.baseVal = name;
+			Polymer.dom(el).classList.node.className.baseVal = name;
 		}
 	},
 
 	// @function getClass(el: HTMLElement): String
 	// Returns the element's class.
 	getClass: function (el) {
-		return el.className.baseVal === undefined ? el.className : el.className.baseVal;
+		return Polymer.dom(el).classList.node.className.baseVal === undefined ? Polymer.dom(el).classList.node.className : Polymer.dom(el).classList.node.className.baseVal;
 	},
 
 	// @function setOpacity(el: HTMLElement, opacity: Number)
@@ -1383,10 +1384,10 @@ L.DomUtil = {
 	// `opacity` must be a number from `0` to `1`.
 	setOpacity: function (el, value) {
 
-		if ('opacity' in el.style) {
-			el.style.opacity = value;
+		if ('opacity' in Polymer.dom(el).node.style) {
+			Polymer.dom(el).node.style.opacity = value;
 
-		} else if ('filter' in el.style) {
+		} else if ('filter' in Polymer.dom(el).node.style) {
 			L.DomUtil._setOpacityIE(el, value);
 		}
 	},
@@ -1397,7 +1398,7 @@ L.DomUtil = {
 
 		// filters collection throws an error if we try to retrieve a filter that doesn't exist
 		try {
-			filter = el.filters.item(filterName);
+			filter = Polymer.dom(el).filters.item(filterName);
 		} catch (e) {
 			// don't set opacity to 1 if we haven't already set an opacity,
 			// it isn't needed and breaks transparent pngs.
@@ -1410,7 +1411,7 @@ L.DomUtil = {
 			filter.Enabled = (value !== 100);
 			filter.Opacity = value;
 		} else {
-			el.style.filter += ' progid:' + filterName + '(opacity=' + value + ')';
+			Polymer.dom(el).node.style.filter += ' progid:' + filterName + '(opacity=' + value + ')';
 		}
 	},
 
@@ -1437,7 +1438,7 @@ L.DomUtil = {
 	setTransform: function (el, offset, scale) {
 		var pos = offset || new L.Point(0, 0);
 
-		el.style[L.DomUtil.TRANSFORM] =
+		Polymer.dom(el).node.style[L.DomUtil.TRANSFORM] =
 			(L.Browser.ie3d ?
 				'translate(' + pos.x + 'px,' + pos.y + 'px)' :
 				'translate3d(' + pos.x + 'px,' + pos.y + 'px,0)') +
@@ -1451,14 +1452,14 @@ L.DomUtil = {
 	setPosition: function (el, point) { // (HTMLElement, Point[, Boolean])
 
 		/*eslint-disable */
-		el._leaflet_pos = point;
+		Polymer.dom(el)._leaflet_pos = point;
 		/*eslint-enable */
 
 		if (L.Browser.any3d) {
 			L.DomUtil.setTransform(el, point);
 		} else {
-			el.style.left = point.x + 'px';
-			el.style.top = point.y + 'px';
+			Polymer.dom(el).node.style.left = point.x + 'px';
+			Polymer.dom(el).node.style.top = point.y + 'px';
 		}
 	},
 
@@ -1468,7 +1469,7 @@ L.DomUtil = {
 		// this method is only used for elements previously positioned using setPosition,
 		// so it's safe to cache the position for performance
 
-		return el._leaflet_pos || new L.Point(0, 0);
+		return Polymer.dom(el)._leaflet_pos || new L.Point(0, 0);
 	}
 };
 
@@ -1547,14 +1548,14 @@ L.DomUtil = {
 	// focusable elements from displaying an outline when the user performs a
 	// drag interaction on them.
 	L.DomUtil.preventOutline = function (element) {
-		while (element.tabIndex === -1) {
-			element = element.parentNode;
+		while (Polymer.dom(element).node.tabIndex === -1) {
+			element = Polymer.dom(element).parentNode;
 		}
-		if (!element || !element.style) { return; }
+		if (!element || !Polymer.dom(element).node.style) { return; }
 		L.DomUtil.restoreOutline();
 		this._outlineElement = element;
-		this._outlineStyle = element.style.outline;
-		element.style.outline = 'none';
+		this._outlineStyle = Polymer.dom(element).node.style.outline;
+		Polymer.dom(element).node.style.outline = 'none';
 		L.DomEvent.on(window, 'keydown', L.DomUtil.restoreOutline, this);
 	};
 
@@ -1562,7 +1563,7 @@ L.DomUtil = {
 	// Cancels the effects of a previous [`L.DomUtil.preventOutline`]().
 	L.DomUtil.restoreOutline = function () {
 		if (!this._outlineElement) { return; }
-		this._outlineElement.style.outline = this._outlineStyle;
+		Polymer.dom(this._outlineElement).node.style.outline = this._outlineStyle;
 		delete this._outlineElement;
 		delete this._outlineStyle;
 		L.DomEvent.off(window, 'keydown', L.DomUtil.restoreOutline, this);
@@ -3991,7 +3992,7 @@ L.GridLayer = L.Layer.extend({
 	_setAutoZIndex: function (compare) {
 		// go through all other layers of the same pane, set zIndex to max + 1 (front) or min - 1 (back)
 
-		var layers = this.getPane().children,
+		var layers = Polymer.dom(this.getPane()).children,
 		    edgeZIndex = -compare(-Infinity, Infinity); // -Infinity for max, Infinity for min
 
 		for (var i = 0, len = layers.length, zIndex; i < len; i++) {
@@ -5708,6 +5709,8 @@ L.marker = function (latlng, options) {
 
 
 
+/* global Polymer */
+/* eslint no-undef: "error" */
 /*
  * @class DivIcon
  * @aka L.DivIcon
@@ -5751,11 +5754,11 @@ L.DivIcon = L.Icon.extend({
 		var div = (oldIcon && oldIcon.tagName === 'DIV') ? oldIcon : document.createElement('div'),
 		    options = this.options;
 
-		div.innerHTML = options.html !== false ? options.html : '';
+		Polymer.dom(div).innerHTML = options.html !== false ? options.html : '';
 
 		if (options.bgPos) {
 			var bgPos = L.point(options.bgPos);
-			div.style.backgroundPosition = (-bgPos.x) + 'px ' + (-bgPos.y) + 'px';
+			Polymer.dom(div).style.backgroundPosition = (-bgPos.x) + 'px ' + (-bgPos.y) + 'px';
 		}
 		this._setIconStyles(div, 'icon');
 
@@ -8221,6 +8224,8 @@ L.svg = function (options) {
 
 
 
+/* global Polymer */
+/* eslint no-undef: "error" */
 /*
  * Thanks to Dmitry Baranovsky and his Raphael library for inspiration!
  */
@@ -8239,12 +8244,12 @@ L.svg = function (options) {
 L.Browser.vml = !L.Browser.svg && (function () {
 	try {
 		var div = document.createElement('div');
-		div.innerHTML = '<v:shape adj="1"/>';
+		Polymer.dom(div).innerHTML = '<v:shape adj="1"/>';
 
-		var shape = div.firstChild;
-		shape.style.behavior = 'url(#default#VML)';
+		var shape = Polymer.dom(div).firstChild;
+		Polymer.dom(shape).node.style.behavior = 'url(#default#VML)';
 
-		return shape && (typeof shape.adj === 'object');
+		return shape && (typeof Polymer.dom(shape).node.adj === 'object');
 
 	} catch (e) {
 		return false;
@@ -8271,14 +8276,14 @@ L.SVG.include(!L.Browser.vml ? {} : {
 		container.coordsize = '1 1';
 
 		layer._path = L.SVG.create('path');
-		container.appendChild(layer._path);
+		Polymer.dom(container).appendChild(layer._path);
 
 		this._updateStyle(layer);
 	},
 
 	_addPath: function (layer) {
 		var container = layer._container;
-		this._container.appendChild(container);
+		Polymer.dom(this._container).appendChild(container);
 
 		if (layer.options.interactive) {
 			layer.addInteractiveTarget(container);
@@ -8304,7 +8309,7 @@ L.SVG.include(!L.Browser.vml ? {} : {
 			if (!stroke) {
 				stroke = layer._stroke = L.SVG.create('stroke');
 			}
-			container.appendChild(stroke);
+			Polymer.dom(container).appendChild(stroke);
 			stroke.weight = options.weight + 'px';
 			stroke.color = options.color;
 			stroke.opacity = options.opacity;
@@ -8320,7 +8325,7 @@ L.SVG.include(!L.Browser.vml ? {} : {
 			stroke.joinstyle = options.lineJoin;
 
 		} else if (stroke) {
-			container.removeChild(stroke);
+			Polymer.dom(container).removeChild(stroke);
 			layer._stroke = null;
 		}
 
@@ -8328,12 +8333,12 @@ L.SVG.include(!L.Browser.vml ? {} : {
 			if (!fill) {
 				fill = layer._fill = L.SVG.create('fill');
 			}
-			container.appendChild(fill);
+			Polymer.dom(container).appendChild(fill);
 			fill.color = options.fillColor || options.color;
 			fill.opacity = options.fillOpacity;
 
 		} else if (fill) {
-			container.removeChild(fill);
+			Polymer.dom(container).removeChild(fill);
 			layer._fill = null;
 		}
 	},
@@ -11024,9 +11029,9 @@ L.Control = L.Class.extend({
 		L.DomUtil.addClass(container, 'leaflet-control');
 
 		if (pos.indexOf('bottom') !== -1) {
-			corner.insertBefore(container, corner.firstChild);
+			Polymer.dom(corner).insertBefore(container, Polymer.dom(corner).firstChild);
 		} else {
-			corner.appendChild(container);
+			Polymer.dom(corner).appendChild(container);
 		}
 
 		return this;
@@ -11101,6 +11106,8 @@ L.Map.include({
 
 
 
+/* global Polymer */
+/* eslint no-undef: "error" */
 /*
  * @class Control.Zoom
  * @aka L.Control.Zoom
@@ -11178,9 +11185,9 @@ L.Control.Zoom = L.Control.extend({
 
 	_createButton: function (html, title, className, container, fn) {
 		var link = L.DomUtil.create('a', className, container);
-		link.innerHTML = html;
-		link.href = '#';
-		link.title = title;
+		Polymer.dom(link).innerHTML = html;
+		Polymer.dom(link).node.href = '#';
+		Polymer.dom(link).node.title = title;
 
 		L.DomEvent
 		    .on(link, 'mousedown dblclick', L.DomEvent.stopPropagation)
@@ -11231,6 +11238,8 @@ L.control.zoom = function (options) {
 
 
 
+/* global Polymer */
+/* eslint no-undef: "error" */
 /*
  * @class Control.Attribution
  * @aka L.Control.Attribution
@@ -11331,7 +11340,7 @@ L.Control.Attribution = L.Control.extend({
 			prefixAndAttribs.push(attribs.join(', '));
 		}
 
-		this._container.innerHTML = prefixAndAttribs.join(' | ');
+		Polymer.dom(this._container).innerHTML = prefixAndAttribs.join(' | ');
 	}
 });
 
@@ -11358,6 +11367,8 @@ L.control.attribution = function (options) {
 
 
 
+/* global Polymer */
+/* eslint no-undef: "error" */
 /*
  * @class Control.Scale
  * @aka L.Control.Scale
@@ -11463,8 +11474,8 @@ L.Control.Scale = L.Control.extend({
 	},
 
 	_updateScale: function (scale, text, ratio) {
-		scale.style.width = Math.round(this.options.maxWidth * ratio) + 'px';
-		scale.innerHTML = text;
+		Polymer.dom(scale).node.style.width = Math.round(this.options.maxWidth * ratio) + 'px';
+		Polymer.dom(scale).innerHTML = text;
 	},
 
 	_getRoundNum: function (num) {
@@ -11677,7 +11688,7 @@ L.Control.Layers = L.Control.extend({
 		this._separator = L.DomUtil.create('div', className + '-separator', form);
 		this._overlaysList = L.DomUtil.create('div', className + '-overlays', form);
 
-		container.appendChild(form);
+		Polymer.dom(container).appendChild(form);
 	},
 
 	_getLayer: function (id) {
@@ -11764,7 +11775,7 @@ L.Control.Layers = L.Control.extend({
 		var radioFragment = document.createElement('div');
 		radioFragment.innerHTML = radioHtml;
 
-		return radioFragment.firstChild;
+		return Polymer.dom(radioFragment).firstChild;
 	},
 
 	_addItem: function (obj) {
@@ -11792,12 +11803,12 @@ L.Control.Layers = L.Control.extend({
 		// https://github.com/Leaflet/Leaflet/issues/2771
 		var holder = document.createElement('div');
 
-		label.appendChild(holder);
-		holder.appendChild(input);
-		holder.appendChild(name);
+		Polymer.dom(label).appendChild(holder);
+		Polymer.dom(holder).appendChild(input);
+		Polymer.dom(holder).appendChild(name);
 
 		var container = obj.overlay ? this._overlaysList : this._baseLayersList;
-		container.appendChild(label);
+		Polymer.dom(container).appendChild(label);
 
 		this._checkDisabledLayers();
 		return label;
@@ -12076,6 +12087,8 @@ L.Map.include({
 
 
 
+/* global Polymer */
+/* eslint no-undef: "error" */
 /*
  * Extends L.Map to handle zoom animations.
  */
@@ -12117,7 +12130,7 @@ L.Map.include(!zoomAnimated ? {} : {
 	_createAnimProxy: function () {
 
 		var proxy = this._proxy = L.DomUtil.create('div', 'leaflet-proxy leaflet-zoom-animated');
-		this._panes.mapPane.appendChild(proxy);
+		Polymer.dom(this._panes.mapPane).appendChild(proxy);
 
 		this.on('zoomanim', function (e) {
 			var prop = L.DomUtil.TRANSFORM,

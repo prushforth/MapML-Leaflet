@@ -16,6 +16,4 @@ index.html
 bower.json
 component.json
 debug/local/
-/nbproject/project.xml
-/nbproject/project.properties
-/dist/
+/nbproject/private/
