@@ -1941,12 +1941,12 @@ var svg = !!(document.createElementNS && svgCreate('svg').createSVGRect);
 var vml = !svg && (function () {
 	try {
 		var div = document.createElement('div');
-		div.innerHTML = '<v:shape adj="1"/>';
+		Polymer.dom(div).innerHTML = '<v:shape adj="1"/>';
 
-		var shape = div.firstChild;
-		shape.style.behavior = 'url(#default#VML)';
+		var shape = Polymer.dom(div).firstChild;
+		Polymer.dom(shape).node.style.behavior = 'url(#default#VML)';
 
-		return shape && (typeof shape.adj === 'object');
+		return shape && (typeof Polymer.dom(shape).node.adj === 'object');
 
 	} catch (e) {
 		return false;
@@ -2477,7 +2477,7 @@ function isExternalTarget(el, e) {
 
 	try {
 		while (related && (related !== el)) {
-			related = related.parentNode;
+			related = Polymer.dom(related).parentNode;
 		}
 	} catch (err) {
 		return false;
@@ -2568,9 +2568,10 @@ function get(id) {
 // Returns the value for a certain style attribute on an element,
 // including computed values or values set through CSS.
 function getStyle(el, style) {
-	var value = el.style[style] || (el.currentStyle && el.currentStyle[style]);
+	var value = Polymer.dom(el).node.style[style] || (Polymer.dom(el).node.currentStyle && Polymer.dom(el).node.currentStyle[style]);
 
 	if ((!value || value === 'auto') && document.defaultView) {
+  Polymer.dom.flush();
 		var css = document.defaultView.getComputedStyle(el, null);
 		value = css ? css[style] : null;
 	}
@@ -2584,7 +2585,7 @@ function create$1(tagName, className, container) {
 	el.className = className || '';
 
 	if (container) {
-		container.appendChild(el);
+		Polymer.dom(container).appendChild(el);
 	}
 	return el;
 }
@@ -2592,9 +2593,9 @@ function create$1(tagName, className, container) {
 // @function remove(el: HTMLElement)
 // Removes `el` from its parent element
 function remove(el) {
-	var parent = el.parentNode;
+	var parent = Polymer.dom(el).parentNode;
 	if (parent) {
-		parent.removeChild(el);
+		Polymer.dom(parent).removeChild(el);
 	}
 }
 
@@ -2602,33 +2603,33 @@ function remove(el) {
 // Removes all of `el`'s children elements from `el`
 function empty(el) {
 	while (el.firstChild) {
-		el.removeChild(el.firstChild);
+		Polymer.dom(el).removeChild(Polymer.dom(el).firstChild);
 	}
 }
 
 // @function toFront(el: HTMLElement)
 // Makes `el` the last child of its parent, so it renders in front of the other children.
 function toFront(el) {
-	var parent = el.parentNode;
+	var parent = Polymer.dom(el).parentNode;
 	if (parent.lastChild !== el) {
-		parent.appendChild(el);
+		Polymer.dom(Polymer.dom(el).parentNode).appendChild(el);
 	}
 }
 
 // @function toBack(el: HTMLElement)
 // Makes `el` the first child of its parent, so it renders behind the other children.
 function toBack(el) {
-	var parent = el.parentNode;
-	if (parent.firstChild !== el) {
-		parent.insertBefore(el, parent.firstChild);
+	var parent = Polymer.dom(el).parentNode;
+	if (Polymer.dom(parent).firstChild !== el) {
+	Polymer.dom(parent).insertBefore(el, Polymer.dom(parent).firstChild);
 	}
 }
 
 // @function hasClass(el: HTMLElement, name: String): Boolean
 // Returns `true` if the element's class attribute contains `name`.
 function hasClass(el, name) {
-	if (el.classList !== undefined) {
-		return el.classList.contains(name);
+	if (Polymer.dom(el).classList !== undefined) {
+		return Polymer.dom(el).classList.contains(name);
 	}
 	var className = getClass(el);
 	return className.length > 0 && new RegExp('(^|\\s)' + name + '(\\s|$)').test(className);
@@ -2637,10 +2638,10 @@ function hasClass(el, name) {
 // @function addClass(el: HTMLElement, name: String)
 // Adds `name` to the element's class attribute.
 function addClass(el, name) {
-	if (el.classList !== undefined) {
+	if (Polymer.dom(el).classList !== undefined) {
 		var classes = splitWords(name);
 		for (var i = 0, len = classes.length; i < len; i++) {
-			el.classList.add(classes[i]);
+			Polymer.dom(el).classList.add(classes[i]);
 		}
 	} else if (!hasClass(el, name)) {
 		var className = getClass(el);
@@ -2651,8 +2652,8 @@ function addClass(el, name) {
 // @function removeClass(el: HTMLElement, name: String)
 // Removes `name` from the element's class attribute.
 function removeClass(el, name) {
-	if (el.classList !== undefined) {
-		el.classList.remove(name);
+	if (Polymer.dom(el).classList !== undefined) {
+		Polymer.dom(el).classList.remove(name);
 	} else {
 		setClass(el, trim((' ' + getClass(el) + ' ').replace(' ' + name + ' ', ' ')));
 	}
@@ -2661,27 +2662,27 @@ function removeClass(el, name) {
 // @function setClass(el: HTMLElement, name: String)
 // Sets the element's class.
 function setClass(el, name) {
-	if (el.className.baseVal === undefined) {
-		el.className = name;
+	if (Polymer.dom(el).classList.node.className.baseVal === undefined) {
+		Polymer.dom(el).classList.node.className = name;
 	} else {
 		// in case of SVG element
-		el.className.baseVal = name;
+		Polymer.dom(el).className.baseVal = name;
 	}
 }
 
 // @function getClass(el: HTMLElement): String
 // Returns the element's class.
 function getClass(el) {
-	return el.className.baseVal === undefined ? el.className : el.className.baseVal;
+	return Polymer.dom(el).classList.node.className.baseVal === undefined ? Polymer.dom(el).classList.node.className : Polymer.dom(el).classList.node.className.baseVal;
 }
 
 // @function setOpacity(el: HTMLElement, opacity: Number)
 // Set the opacity of an element (including old IE support).
 // `opacity` must be a number from `0` to `1`.
 function setOpacity(el, value) {
-	if ('opacity' in el.style) {
-		el.style.opacity = value;
-	} else if ('filter' in el.style) {
+	if ('opacity' in Polymer.dom(el).node.style) {
+		Polymer.dom(el).node.style.opacity = value;
+	} else if ('filter' in Polymer.dom(el).node.style) {
 		_setOpacityIE(el, value);
 	}
 }
@@ -2692,7 +2693,7 @@ function _setOpacityIE(el, value) {
 
 	// filters collection throws an error if we try to retrieve a filter that doesn't exist
 	try {
-		filter = el.filters.item(filterName);
+		filter = Polymer.dom(el).filters.item(filterName);
 	} catch (e) {
 		// don't set opacity to 1 if we haven't already set an opacity,
 		// it isn't needed and breaks transparent pngs.
@@ -2705,7 +2706,7 @@ function _setOpacityIE(el, value) {
 		filter.Enabled = (value !== 100);
 		filter.Opacity = value;
 	} else {
-		el.style.filter += ' progid:' + filterName + '(opacity=' + value + ')';
+		Polymer.dom(el).node.style.filter += ' progid:' + filterName + '(opacity=' + value + ')';
 	}
 }
 
@@ -2731,7 +2732,7 @@ function testProp(props) {
 function setTransform(el, offset, scale) {
 	var pos = offset || new Point(0, 0);
 
-	el.style[TRANSFORM] =
+	Polymer.dom(el).node.style[TRANSFORM] =
 		(ie3d ?
 			'translate(' + pos.x + 'px,' + pos.y + 'px)' :
 			'translate3d(' + pos.x + 'px,' + pos.y + 'px,0)') +
@@ -2745,14 +2746,14 @@ function setTransform(el, offset, scale) {
 function setPosition(el, point) {
 
 	/*eslint-disable */
-	el._leaflet_pos = point;
+	Polymer.dom(el)._leaflet_pos = point;
 	/* eslint-enable */
 
 	if (any3d) {
 		setTransform(el, point);
 	} else {
-		el.style.left = point.x + 'px';
-		el.style.top = point.y + 'px';
+		Polymer.dom(el).node.style.left = point.x + 'px';
+		Polymer.dom(el).node.style.top = point.y + 'px';
 	}
 }
 
@@ -2762,7 +2763,7 @@ function getPosition(el) {
 	// this method is only used for elements previously positioned using setPosition,
 	// so it's safe to cache the position for performance
 
-	return el._leaflet_pos || new Point(0, 0);
+	return Polymer.dom(el)._leaflet_pos || new Point(0, 0);
 }
 
 // @function disableTextSelection()
@@ -2823,14 +2824,14 @@ var _outlineStyle;
 // focusable elements from displaying an outline when the user performs a
 // drag interaction on them.
 function preventOutline(element) {
-	while (element.tabIndex === -1) {
-		element = element.parentNode;
+	while (Polymer.dom(element).node.tabIndex === -1) {
+		element = Polymer.dom(element).parentNode;
 	}
-	if (!element.style) { return; }
+	if (!Polymer.dom(element).node.style) { return; }
 	restoreOutline();
 	_outlineElement = element;
-	_outlineStyle = element.style.outline;
-	element.style.outline = 'none';
+	_outlineStyle = Polymer.dom(element).node.style.outline;
+	Polymer.dom(element).node.style.outline = 'none';
 	on(window, 'keydown', restoreOutline);
 }
 
@@ -4278,7 +4279,7 @@ var Map = Evented.extend({
 				if (isHover) { break; }
 			}
 			if (src === this._container) { break; }
-			src = src.parentNode;
+			src = Polymer.dom(src).parentNode;
 		}
 		if (!targets.length && !dragging && !isHover && isExternalTarget(src, e)) {
 			targets = [this];
@@ -4505,7 +4506,7 @@ var Map = Evented.extend({
 	_createAnimProxy: function () {
 
 		var proxy = this._proxy = create$1('div', 'leaflet-proxy leaflet-zoom-animated');
-		this._panes.mapPane.appendChild(proxy);
+		Polymer.dom(this._panes.mapPane).appendChild(proxy);
 
 		this.on('zoomanim', function (e) {
 			var prop = TRANSFORM,
@@ -4696,9 +4697,9 @@ var Control = Class.extend({
 		addClass(container, 'leaflet-control');
 
 		if (pos.indexOf('bottom') !== -1) {
-			corner.insertBefore(container, corner.firstChild);
+			Polymer.dom(corner).insertBefore(container, Polymer.dom(corner).firstChild);
 		} else {
-			corner.appendChild(container);
+			Polymer.dom(corner).appendChild(container);
 		}
 
 		return this;
@@ -4983,8 +4984,8 @@ var Layers = Control.extend({
 		}
 
 		var link = this._layersLink = create$1('a', className + '-toggle', container);
-		link.href = '#';
-		link.title = 'Layers';
+		Polymer.dom(link).node.href = '#';
+		Polymer.dom(link).node.title = 'Layers';
 
 		if (touch) {
 			on(link, 'click', stop);
@@ -5001,7 +5002,7 @@ var Layers = Control.extend({
 		this._separator = create$1('div', className + '-separator', form);
 		this._overlaysList = create$1('div', className + '-overlays', form);
 
-		container.appendChild(form);
+		Polymer.dom(container).appendChild(form);
 	},
 
 	_getLayer: function (id) {
@@ -5098,9 +5099,9 @@ var Layers = Control.extend({
 				name + '"' + (checked ? ' checked="checked"' : '') + '/>';
 
 		var radioFragment = document.createElement('div');
-		radioFragment.innerHTML = radioHtml;
+		Polymer.dom(radioFragment).innerHTML = radioHtml;
 
-		return radioFragment.firstChild;
+		return Polymer.dom(radioFragment).firstChild;
 	},
 
 	_addItem: function (obj) {
@@ -5123,18 +5124,18 @@ var Layers = Control.extend({
 		on(input, 'click', this._onInputClick, this);
 
 		var name = document.createElement('span');
-		name.innerHTML = ' ' + obj.name;
+		Polymer.dom(name).innerHTML = ' ' + obj.name;
 
 		// Helps from preventing layer control flicker when checkboxes are disabled
 		// https://github.com/Leaflet/Leaflet/issues/2771
 		var holder = document.createElement('div');
 
-		label.appendChild(holder);
-		holder.appendChild(input);
-		holder.appendChild(name);
+		Polymer.dom(label).appendChild(holder);
+		Polymer.dom(holder).appendChild(input);
+		Polymer.dom(holder).appendChild(name);
 
 		var container = obj.overlay ? this._overlaysList : this._baseLayersList;
-		container.appendChild(label);
+		Polymer.dom(container).appendChild(label);
 
 		this._checkDisabledLayers();
 		return label;
@@ -5294,9 +5295,9 @@ var Zoom = Control.extend({
 
 	_createButton: function (html, title, className, container, fn) {
 		var link = create$1('a', className, container);
-		link.innerHTML = html;
-		link.href = '#';
-		link.title = title;
+		Polymer.dom(link).innerHTML = html;
+		Polymer.dom(link).node.href = '#';
+		Polymer.dom(link).node.title = title;
 
 		/*
 		 * Will force screen readers like VoiceOver to read this as "Zoom in - button"
@@ -5455,8 +5456,8 @@ var Scale = Control.extend({
 	},
 
 	_updateScale: function (scale, text, ratio) {
-		scale.style.width = Math.round(this.options.maxWidth * ratio) + 'px';
-		scale.innerHTML = text;
+		Polymer.dom(scale).node.style.width = Math.round(this.options.maxWidth * ratio) + 'px';
+		Polymer.dom(scale).innerHTML = text;
 	},
 
 	_getRoundNum: function (num) {
@@ -5577,7 +5578,7 @@ var Attribution = Control.extend({
 			prefixAndAttribs.push(attribs.join(', '));
 		}
 
-		this._container.innerHTML = prefixAndAttribs.join(' | ');
+		Polymer.dom(this._container).innerHTML = prefixAndAttribs.join(' | ');
 	}
 });
 
@@ -7099,7 +7100,7 @@ var IconDefault = Icon.extend({
 		var path = getStyle(el, 'background-image') ||
 		           getStyle(el, 'backgroundImage');	// IE8
 
-		document.body.removeChild(el);
+		Polymer.dom(document.body).removeChild(el);
 
 		if (path === null || path.indexOf('url') !== 0) {
 			path = '';
@@ -7459,11 +7460,11 @@ var Marker = Layer.extend({
 			addIcon = true;
 
 			if (options.title) {
-				icon.title = options.title;
+				Polymer.dom(icon).node.title = options.title;
 			}
 
-			if (icon.tagName === 'IMG') {
-				icon.alt = options.alt || '';
+			if (Polymer.dom(icon).node.tagName === 'IMG') {
+				Polymer.dom(icon).node.alt = options.alt || '';
 			}
 		}
 
@@ -7503,11 +7504,11 @@ var Marker = Layer.extend({
 
 
 		if (addIcon) {
-			this.getPane().appendChild(this._icon);
+			Polymer.dom(this.getPane()).appendChild(this._icon);
 		}
 		this._initInteraction();
 		if (newShadow && addShadow) {
-			this.getPane('shadowPane').appendChild(this._shadow);
+			Polymer.dom(this.getPane('shadowPane')).appendChild(this._shadow);
 		}
 	},
 
@@ -8950,7 +8951,7 @@ var ImageOverlay = Layer.extend({
 			this.addInteractiveTarget(this._image);
 		}
 
-		this.getPane().appendChild(this._image);
+		Polymer.dom(this.getPane()).appendChild(this._image);
 		this._reset();
 	},
 
@@ -9201,7 +9202,7 @@ var VideoOverlay = ImageOverlay.extend({
 		for (var i = 0; i < this._url.length; i++) {
 			var source = create$1('source');
 			source.src = this._url[i];
-			vid.appendChild(source);
+			Polymer.dom(vid).appendChild(source);
 		}
 	}
 
@@ -9264,7 +9265,7 @@ var DivOverlay = Layer.extend({
 		}
 
 		clearTimeout(this._removeTimeout);
-		this.getPane().appendChild(this._container);
+		Polymer.dom(this.getPane()).appendChild(this._container);
 		this.update();
 
 		if (map._fadeAnimated) {
@@ -9380,12 +9381,12 @@ var DivOverlay = Layer.extend({
 		var content = (typeof this._content === 'function') ? this._content(this._source || this) : this._content;
 
 		if (typeof content === 'string') {
-			node.innerHTML = content;
+			Polymer.dom(node).innerHTML = content;
 		} else {
 			while (node.hasChildNodes()) {
-				node.removeChild(node.firstChild);
+				Polymer.dom(node).removeChild(node.firstChild);
 			}
-			node.appendChild(content);
+			Polymer.dom(node).appendChild(content);
 		}
 		this.fire('contentupdate');
 	},
@@ -9600,8 +9601,8 @@ var Popup = DivOverlay.extend({
 
 		if (this.options.closeButton) {
 			var closeButton = this._closeButton = create$1('a', prefix + '-close-button', container);
-			closeButton.href = '#close';
-			closeButton.innerHTML = '&#215;';
+			Polymer.dom(closeButton).node.href = '#close';
+			Polymer.dom(closeButton).innerHTML = '&#215;';
 
 			on(closeButton, 'click', this._onCloseButtonClick, this);
 		}
@@ -10392,11 +10393,11 @@ var DivIcon = Icon.extend({
 		var div = (oldIcon && oldIcon.tagName === 'DIV') ? oldIcon : document.createElement('div'),
 		    options = this.options;
 
-		div.innerHTML = options.html !== false ? options.html : '';
+		Polymer.dom(div).innerHTML = options.html !== false ? options.html : '';
 
 		if (options.bgPos) {
 			var bgPos = toPoint(options.bgPos);
-			div.style.backgroundPosition = (-bgPos.x) + 'px ' + (-bgPos.y) + 'px';
+			Polymer.dom(div).node.style.backgroundPosition = (-bgPos.x) + 'px ' + (-bgPos.y) + 'px';
 		}
 		this._setIconStyles(div, 'icon');
 
@@ -10764,7 +10765,7 @@ var GridLayer = Layer.extend({
 			this._updateOpacity();
 		}
 
-		this.getPane().appendChild(this._container);
+		Polymer.dom(this.getPane()).appendChild(this._container);
 	},
 
 	_updateLevels: function () {
@@ -11116,7 +11117,7 @@ var GridLayer = Layer.extend({
 				this._addTile(queue[i], fragment);
 			}
 
-			this._level.el.appendChild(fragment);
+			Polymer.dom(this._level.el).appendChild(fragment);
 		}
 	},
 
@@ -11242,7 +11243,7 @@ var GridLayer = Layer.extend({
 			current: true
 		};
 
-		container.appendChild(tile);
+		Polymer.dom(container).appendChild(tile);
 		// @event tileloadstart: TileEvent
 		// Fired when a tile is requested and starts loading.
 		this.fire('tileloadstart', {
@@ -11763,7 +11764,7 @@ var Renderer = Layer.extend({
 			}
 		}
 
-		this.getPane().appendChild(this._container);
+		Polymer.dom(this.getPane()).appendChild(this._container);
 		this._update();
 		this.on('update', this._updatePaths, this);
 	},
@@ -12354,7 +12355,7 @@ var vmlMixin = {
 		container.coordsize = '1 1';
 
 		layer._path = vmlCreate('path');
-		container.appendChild(layer._path);
+		Polymer.dom(container).appendChild(layer._path);
 
 		this._updateStyle(layer);
 		this._layers[stamp(layer)] = layer;
@@ -12362,7 +12363,7 @@ var vmlMixin = {
 
 	_addPath: function (layer) {
 		var container = layer._container;
-		this._container.appendChild(container);
+		Polymer.dom(this._container).appendChild(container);
 
 		if (layer.options.interactive) {
 			layer.addInteractiveTarget(container);
@@ -12389,7 +12390,7 @@ var vmlMixin = {
 			if (!stroke) {
 				stroke = layer._stroke = vmlCreate('stroke');
 			}
-			container.appendChild(stroke);
+			Polymer.dom(container).appendChild(stroke);
 			stroke.weight = options.weight + 'px';
 			stroke.color = options.color;
 			stroke.opacity = options.opacity;
@@ -12405,7 +12406,7 @@ var vmlMixin = {
 			stroke.joinstyle = options.lineJoin;
 
 		} else if (stroke) {
-			container.removeChild(stroke);
+			Polymer.dom(container).removeChild(stroke);
 			layer._stroke = null;
 		}
 
@@ -12413,12 +12414,12 @@ var vmlMixin = {
 			if (!fill) {
 				fill = layer._fill = vmlCreate('fill');
 			}
-			container.appendChild(fill);
+			Polymer.dom(container).appendChild(fill);
 			fill.color = options.fillColor || options.color;
 			fill.opacity = options.fillOpacity;
 
 		} else if (fill) {
-			container.removeChild(fill);
+			Polymer.dom(container).removeChild(fill);
 			layer._fill = null;
 		}
 	},
@@ -12495,10 +12496,10 @@ var SVG = Renderer.extend({
 		this._container = create$2('svg');
 
 		// makes it possible to click through svg root; we'll reset it back in individual paths
-		this._container.setAttribute('pointer-events', 'none');
+		Polymer.dom(this._container).setAttribute('pointer-events', 'none');
 
 		this._rootGroup = create$2('g');
-		this._container.appendChild(this._rootGroup);
+		Polymer.dom(this._container).appendChild(this._rootGroup);
 	},
 
 	_destroyContainer: function () {
@@ -12528,13 +12529,13 @@ var SVG = Renderer.extend({
 		// set size of svg-container if changed
 		if (!this._svgSize || !this._svgSize.equals(size)) {
 			this._svgSize = size;
-			container.setAttribute('width', size.x);
-			container.setAttribute('height', size.y);
+			Polymer.dom(container).setAttribute('width', size.x);
+			Polymer.dom(container).setAttribute('height', size.y);
 		}
 
 		// movement: update container viewBox so that we don't have to change coordinates of individual layers
 		setPosition(container, b.min);
-		container.setAttribute('viewBox', [b.min.x, b.min.y, size.x, size.y].join(' '));
+		Polymer.dom(container).setAttribute('viewBox', [b.min.x, b.min.y, size.x, size.y].join(' '));
 
 		this.fire('update');
 	},
@@ -12561,7 +12562,7 @@ var SVG = Renderer.extend({
 
 	_addPath: function (layer) {
 		if (!this._rootGroup) { this._initContainer(); }
-		this._rootGroup.appendChild(layer._path);
+		Polymer.dom(this._rootGroup).appendChild(layer._path);
 		layer.addInteractiveTarget(layer._path);
 	},
 
@@ -12583,33 +12584,33 @@ var SVG = Renderer.extend({
 		if (!path) { return; }
 
 		if (options.stroke) {
-			path.setAttribute('stroke', options.color);
-			path.setAttribute('stroke-opacity', options.opacity);
-			path.setAttribute('stroke-width', options.weight);
-			path.setAttribute('stroke-linecap', options.lineCap);
-			path.setAttribute('stroke-linejoin', options.lineJoin);
+			Polymer.dom(path).setAttribute('stroke', options.color);
+			Polymer.dom(path).setAttribute('stroke-opacity', options.opacity);
+			Polymer.dom(path).setAttribute('stroke-width', options.weight);
+			Polymer.dom(path).setAttribute('stroke-linecap', options.lineCap);
+			Polymer.dom(path).setAttribute('stroke-linejoin', options.lineJoin);
 
 			if (options.dashArray) {
-				path.setAttribute('stroke-dasharray', options.dashArray);
+				Polymer.dom(path).setAttribute('stroke-dasharray', options.dashArray);
 			} else {
-				path.removeAttribute('stroke-dasharray');
+				Polymer.dom(path).removeAttribute('stroke-dasharray');
 			}
 
 			if (options.dashOffset) {
-				path.setAttribute('stroke-dashoffset', options.dashOffset);
+				Polymer.dom(path).setAttribute('stroke-dashoffset', options.dashOffset);
 			} else {
-				path.removeAttribute('stroke-dashoffset');
+				Polymer.dom(path).removeAttribute('stroke-dashoffset');
 			}
 		} else {
-			path.setAttribute('stroke', 'none');
+			Polymer.dom(path).setAttribute('stroke', 'none');
 		}
 
 		if (options.fill) {
-			path.setAttribute('fill', options.fillColor || options.color);
-			path.setAttribute('fill-opacity', options.fillOpacity);
-			path.setAttribute('fill-rule', options.fillRule || 'evenodd');
+			Polymer.dom(path).setAttribute('fill', options.fillColor || options.color);
+			Polymer.dom(path).setAttribute('fill-opacity', options.fillOpacity);
+			Polymer.dom(path).setAttribute('fill-rule', options.fillRule || 'evenodd');
 		} else {
-			path.setAttribute('fill', 'none');
+			Polymer.dom(path).setAttribute('fill', 'none');
 		}
 	},
 
@@ -12633,7 +12634,7 @@ var SVG = Renderer.extend({
 	},
 
 	_setPath: function (layer, path) {
-		layer._path.setAttribute('d', path);
+		Polymer.dom(layer._path).setAttribute('d', path);
 	},
 
 	// SVG does not have the concept of zIndex so we resort to changing the DOM order of elements

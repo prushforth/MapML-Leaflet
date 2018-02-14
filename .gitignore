@@ -12,3 +12,4 @@ coverage/
 index.html
 .mailmap
 component.json
+/nbproject/private/
