@@ -2582,7 +2582,7 @@ function getStyle(el, style) {
 // Creates an HTML element with `tagName`, sets its class to `className`, and optionally appends it to `container` element.
 function create$1(tagName, className, container) {
 	var el = document.createElement(tagName);
-	el.className = className || '';
+	Polymer.dom(el).node.className = className || '';
 
 	if (container) {
 		Polymer.dom(container).appendChild(el);
