@@ -2602,7 +2602,7 @@ function remove(el) {
 // @function empty(el: HTMLElement)
 // Removes all of `el`'s children elements from `el`
 function empty(el) {
-	while (el.firstChild) {
+	while (Polymer.dom(el).firstChild) {
 		Polymer.dom(el).removeChild(Polymer.dom(el).firstChild);
 	}
 }
