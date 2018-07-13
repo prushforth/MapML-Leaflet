@@ -1,5 +1,5 @@
 /*
- Leaflet 1.0.0-rc.1 ("9721c93"), a JS library for interactive maps. http://leafletjs.com
+ Leaflet 1.0.0-rc.1 ("11b96b80"), a JS library for interactive maps. http://leafletjs.com
  (c) 2010-2015 Vladimir Agafonkin, (c) 2010-2011 CloudMade
 */
 (function (window, document, undefined) {
